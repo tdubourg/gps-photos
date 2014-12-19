@@ -1,5 +1,5 @@
 
-var	load_images_db = function (db_path) {
+var load_images_db = function (db_path) {
 	console.log("Start load_images_db")
 	// Might be used later, but for now I'd rather not have any user input, so we'll just use a simplistic web server
 	// to serve the files
@@ -58,18 +58,31 @@ function showThumb(data){
 		});
 		infowindowOpen.open(googleMap,marker);
 	});
+	return marker
 }
 
 var start = function () {
 	pictures = load_images_db("/thumbs/heyhey.csv")
 	var mapOptions = {
 		center: { lat: 41.41361111111111, lng: 2.1530555555555555}, 
-   		zoom: 9
+		zoom: 9
 	};
 	googleMap = new google.maps.Map(document.getElementById("googleMap"),mapOptions);
+	
+	var markers = []
 	for (var i = pictures.length - 1; i >= 0; i--) {
-		showThumb(pictures[i])
+		markers.push(showThumb(pictures[i]))
 	};
+
+	var zoom = 14;
+	var size = -1;
+	zoom = zoom == -1 ? null : zoom;
+	size = size == -1 ? null : size;
+
+	markerClusterer = new MarkerClusterer(googleMap, markers, {
+	  maxZoom: zoom,
+	  gridSize: size,
+	});
 }
 
 google.maps.event.addDomListener(window, 'load', start);
