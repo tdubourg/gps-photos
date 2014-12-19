@@ -23,7 +23,22 @@ CLI_ARGS = [
     "path_to_db.csv"
 ]
 
-ALLOWED_EXTENSIONS = ["jpg", "  jpeg"]
+ALLOWED_EXTENSIONS      = ["jpg", "  jpeg"]
+
+POOL_SIZE               = 3 # TODO: Determine this depending on the number of CPUs on the current computer
+DATA_SET_SIZE           = None
+BATCH_SIZE              = None
+WORKERS_SORT_OF_QUEUE   = None
+
+def thumbnail_worker(start_val):
+    for x in WORKERS_SORT_OF_QUEUE[start_val:start_val + BATCH_SIZE]:
+        log("Processing image", x, "for thumbnailing...")
+        # TEMPORARY! simulating image processing
+        from time import sleep
+        from random import random
+        sleep(random()*3)
+        log("Finished", x)
+    return True
 
 def thumbnail_path(fpath):
     # @TODO
@@ -33,6 +48,8 @@ def main(argv):
     import csv, pexif
     from glob import glob
     import os
+    from multiprocessing import Pool
+    from time import time
 
     ##### Step 1: Get CLI arguments? #####
 
@@ -72,15 +89,14 @@ def main(argv):
 
     log("Image paths found:", images)
 
-    images_with_geo = []
+    thumbs_to_be_generated = []
     for fname in images:
         with open(fname, 'r') as fi:
             i = pexif.JpegFile.fromFd(fi)
             try:
                 geo = i.get_geo()
-                images_with_geo.append(i)
             except Exception:
-                print fname, "has no GEO info"
+                log(fname, "has no GEO info")
                 continue  # Skip the rest, no geo data
 
             ### Step 3: For every image with geo data, register it in a CSV file (we do not need a DB, CSV is more readable...) ###
@@ -92,11 +108,27 @@ def main(argv):
                 geo[1],
                 thumb_path,
             ])
+            thumbs_to_be_generated.append((fname, thumb_path))
 
-            ### Step 4: For every image, create a thumbnail in the specified folder, to be used by the web UI:
-            # TODO: To be handled by a forked process (danger: forkbomb if many images?)
-            # Should we fork a unique process and... Hey, wait, the Multiprocessing module is made for that
-            # just allocate a pool of CPU * 1.5 workers, feed them with stuff to do, wait for termination! 
+    ### Step 4: For every image, create a thumbnail in the specified folder, to be used by the web UI:
+    # TODO: To be handled by a forked process (danger: forkbomb if many images?)
+    # Should we fork a unique process and... Hey, wait, the Multiprocessing module is made for that
+    # just allocate a pool of CPU * 1.5 workers, feed them with stuff to do, wait for termination! 
+    global DATA_SET_SIZE, BATCH_SIZE, WORKERS_SORT_OF_QUEUE
+    WORKERS_SORT_OF_QUEUE = thumbs_to_be_generated
+    
+    DATA_SET_SIZE = len(WORKERS_SORT_OF_QUEUE)
+    BATCH_SIZE = DATA_SET_SIZE / POOL_SIZE
+    
+    log("Generating workers pool...")
+    p = Pool(processes=POOL_SIZE)
+    start_values = range(0, DATA_SET_SIZE, BATCH_SIZE)
+    log("Start values:", start_values)
+    t0 = time()
+    p.map(thumbnail_worker, start_values)
+    p.close()
+    p.join()
+    log("Workers finished in %.3f." % (time()-t0))
 
 
 if __name__ == '__main__':
