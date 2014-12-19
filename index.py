@@ -91,11 +91,11 @@ def main(argv):
         # Note: Here, we are assuming usage a *real* filesystem, that is to say case-sensitive
         # If using Mac or Windows filesystems, just deal with your ***** yourself...
         pattern = os.path.join(folder, "*." + ext.lower())
-        log("Currently globbing with pattern:", ext)
+        log("Currently globbing with pattern:", pattern)
         images.extend(glob(pattern))
         
         pattern = os.path.join(folder, "*." + ext.upper())
-        log("Currently globbing with pattern:", ext)
+        log("Currently globbing with pattern:", pattern)
         images.extend(glob(pattern))
 
     log("Image paths found:", images)
