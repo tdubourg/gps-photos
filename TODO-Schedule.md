@@ -2,11 +2,12 @@
 
 ### Map with images displayed at their geotagged location
 
-- Loop through images and index them by reading their EXIF data
-- Generate thumbnails
-- Register thumbnails location for every image
-- Load this data from JS
-- Use GG Maps API in order to display dots and thumbnails of images at their geotagged location
+- Loop through images and index them by reading their EXIF data - DONE
+- Generate thumbnails - DONE (TODO: change their size?)
+- Register thumbnails location for every image - DONE
+- Load this data from JS - DONE
+- Use GG Maps API in order to display dots and thumbnails of images at their geotagged location - DONE: But changing the size
+of the thumbnails could help
 
 
 ### Use time-neighboring photos in order to suggest location to non-geotagged photos (typically, digital cameras)
