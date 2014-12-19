@@ -40,7 +40,7 @@ DATA_SET_SIZE           = None
 BATCH_SIZE              = None
 WORKERS_SORT_OF_QUEUE   = None
 THUMBNAIL_SIZE          = 128, 128
-THUMBNAIL_FOLDER        = "/tmp/thumbs/"  # TODO change that
+THUMBNAIL_FOLDER        = "./ui/thumbs/"  # TODO change that
 
 def thumbnail_worker(start_val):
     for x in WORKERS_SORT_OF_QUEUE[start_val:start_val + BATCH_SIZE]:
