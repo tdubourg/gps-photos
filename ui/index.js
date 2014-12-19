@@ -74,14 +74,9 @@ var start = function () {
 		markers.push(showThumb(pictures[i]))
 	};
 
-	var zoom = 12;
-	var size = -1;
-	zoom = zoom == -1 ? null : zoom;
-	size = size == -1 ? null : size;
-
 	markerClusterer = new MarkerClusterer(googleMap, markers, {
-	  maxZoom: zoom,
-	  gridSize: size,
+	  maxZoom: 10,
+	  gridSize: null,
 	});
 }
 
