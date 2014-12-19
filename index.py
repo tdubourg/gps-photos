@@ -16,6 +16,7 @@
 
 from PIL import Image
 import csv, pexif
+from multiprocessing import cpu_count
 
 # And this module is used in several functions so we import it once for all
 import os
@@ -35,7 +36,7 @@ CLI_ARGS = [
 
 ALLOWED_EXTENSIONS      = ["jpg", "  jpeg"]
 
-POOL_SIZE               = 3 # TODO: Determine this depending on the number of CPUs on the current computer
+POOL_SIZE               = cpu_count() * 3 / 2
 DATA_SET_SIZE           = None
 BATCH_SIZE              = None
 WORKERS_SORT_OF_QUEUE   = None
@@ -129,6 +130,8 @@ def main(argv):
     
     DATA_SET_SIZE = len(WORKERS_SORT_OF_QUEUE)
     BATCH_SIZE = DATA_SET_SIZE / POOL_SIZE
+    if BATCH_SIZE is 0:
+        BATCH_SIZE = 1
     
     log("Generating workers pool...")
     p = Pool(processes=POOL_SIZE)
