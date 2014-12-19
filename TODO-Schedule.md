@@ -13,10 +13,12 @@ of the thumbnails could help
 ### Use time-neighboring photos in order to suggest location to non-geotagged photos (typically, digital cameras)
 
 - Index photos in a data structure that allows to do closest neighbors search. If we convert dates into timestamps, a simple 
-sorted array might do the trick? To be researched...
+sorted array might do the trick? To be researched... - Did the trick. - DONE - 
 - For every photo that has no GPS tags, search the closest neigHbor in time (/!\ CONVERT EVERYTHING TO THE SAME TIMEZONE (
-Greenwich, for instance) IN ORDER FOR PHOTOS TAKENS AT 1PM IN CET+1 TO BE CONSIDERED NEIGHBORS PHOTOS TAKEN AT 2PM IN CET+2).
-- Apply the tag of the closest photo to the non tagged photo, if less than a given threshold of time. 
+Greenwich, for instance) IN ORDER FOR PHOTOS TAKEN AT 1PM IN CET+1 TO BE CONSIDERED NEIGHBORS PHOTOS TAKEN AT 2PM IN CET+2). 
+<-- Timezone conversion is still to be researched.
+- Apply the tag of the closest photo to the non tagged photo, if less than a given threshold of time.  - DONE, no threshold, 
+though
 
 
 ### Refine the method
