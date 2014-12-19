@@ -10,6 +10,7 @@ var	load_images_db = function (db_path) {
 	// } else {
 	//   alert('The File APIs are not fully supported in this browser. Your browser SUCKS!');
 	// }
+	var result = null
 	$.ajax({
 		url: db_path,
 		async: false,
@@ -17,6 +18,7 @@ var	load_images_db = function (db_path) {
 			data = $.csv2Array(csvd);
 			console.log("load_images_db: Success!")
 			console.log(data)
+			result = data
 		},
 		dataType: "text",
 		complete: function () {
@@ -24,17 +26,19 @@ var	load_images_db = function (db_path) {
 		}
 	});
 	console.log("End load_images_db")
+	return result
 }
 
 
-function showThumb(){
+function showThumb(data){
 	//trace un marqueur
 	var placeholder = "thumbs/20141017_131027_Richtone(HDR).jpg"
+	var img_url = data[4].replace("./ui", "")
 	var marker = new google.maps.Marker({
-		position: new google.maps.LatLng(this.velov_lat, this.velov_long),
+		position: new google.maps.LatLng(data[2], data[3]),
 		map: googleMap,
 		title: "Pictures tagged here (@TODO replace by name of area?)",
-		icon: placeholder
+		icon: img_url
 	});
 
 	var contentString = '<img src="' + placeholder + '" />'
@@ -55,13 +59,15 @@ function showThumb(){
 }
 
 var start = function () {
-	alert("HEY")
-	load_images_db("/thumbs/heyhey.csv")
+	pictures = load_images_db("/thumbs/heyhey.csv")
 	var mapOptions = {
-		zoom: 14
+		center: { lat: 43.202103, lng: 3.080516}, 
+   		zoom: 6
 	};
 	googleMap = new google.maps.Map(document.getElementById("googleMap"),mapOptions);
-	showThumb()
+	for (var i = pictures.length - 1; i >= 0; i--) {
+		showThumb(pictures[i])
+	};
 }
 
-document.ready = start
+google.maps.event.addDomListener(window, 'load', start);
