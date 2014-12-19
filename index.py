@@ -114,9 +114,28 @@ def main(argv):
         ])
         thumbs_to_be_generated.append((fname, thumb_path))
 
+    from PIL import ExifTags, Image
+    SHOT_TIME_EXIF_KEY = None
+    for k, v in ExifTags.TAGS.items():
+        if v == "DateTime":
+            SHOT_TIME_EXIF_KEY = k
+            break
+
+    import datetime
+    from pytz import utc
+
     for fname in images:
         with open(fname, 'r') as fi:
             i = pexif.JpegFile.fromFd(fi)
+            i2 = Image.open(fname)
+            try:
+                shot_time_str = i2._getexif()[SHOT_TIME_EXIF_KEY]
+                fmt_str = '%Y:%m:%d %H:%M:%S'
+                dto = datetime.strptime(shot_time_str, fmt_str)
+                shot_time = utc.localize(dto).time()  # not quite sure that this actually does anything...
+            except:
+                shot_time = os.path.getmtime(fname)  # fallback to file's last modification date
+
             geo = None
             try:
                 geo = i.get_geo()
@@ -124,7 +143,7 @@ def main(argv):
                 log(fname, "has no GEO info")
                 continue  # Skip the rest, no geo data
             finally:
-                images_data.append([fname, os.path.getmtime(fname), geo])
+                images_data.append([fname, shot_time, geo])
 
             ### Step 3: For every image with geo data, register it in a CSV file (we do not need a DB, CSV is more readable...) ###
             insert_im_in_db(fname, geo)
