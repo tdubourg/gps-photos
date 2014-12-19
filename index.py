@@ -73,10 +73,13 @@ def main(argv):
             except Exception:
                 print fname, "has no GEO info"
 
+            ### Step 3: For every image with geo data, register it in a CSV file (we do not need a DB, CSV is more readable...) ###
+            
 
-    ### Step 3: For every image with geo data, register it in a CSV file (we do not need a DB, CSV is more readable...) ###
-
-    ### Step 4: For every image, create a thumbnail in the specified folder, to be used by the web UI:
+            ### Step 4: For every image, create a thumbnail in the specified folder, to be used by the web UI:
+            # TODO: To be handled by a forked process (danger: forkbomb if many images?)
+            # Should we fork a unique process and... Hey, wait, the Multiprocessing module is made for that
+            # just allocate a pool of CPU * 1.5 workers, feed them with stuff to do, wait for termination! 
 
 
 if __name__ == '__main__':
