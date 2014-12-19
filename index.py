@@ -25,6 +25,10 @@ CLI_ARGS = [
 
 ALLOWED_EXTENSIONS = ["jpg", "  jpeg"]
 
+def thumbnail_path(fpath):
+    # @TODO
+    return "/tmp/placeholder.jpg"
+
 def main(argv):
     import csv, pexif
     from glob import glob
@@ -44,6 +48,11 @@ def main(argv):
     if not os.path.isdir(folder):
         print "Invalid folder, please retry."
     db_fname    = argv[2]
+
+    db_f = open(db_fname, "w+")
+    db_w = csv.writer(db_f)
+    ## /!\/!\ CHECK WHETHER IT IS long, lat OR lat, long /!\/!\ ##
+    db_w.writerow(["file_original_location", "time", "lat", "long", "thumb_path"])
 
     ### Step 2: Go through all images files in the folder, for each image, try to find geo data ###
 
@@ -68,13 +77,21 @@ def main(argv):
         with open(fname, 'r') as fi:
             i = pexif.JpegFile.fromFd(fi)
             try:
-                print i.get_geo()
+                geo = i.get_geo()
                 images_with_geo.append(i)
             except Exception:
                 print fname, "has no GEO info"
+                continue  # Skip the rest, no geo data
 
             ### Step 3: For every image with geo data, register it in a CSV file (we do not need a DB, CSV is more readable...) ###
-            
+            thumb_path = thumbnail_path(fname)
+            db_w.writerow([
+                fname,
+                -1, # TODO
+                geo[0],
+                geo[1],
+                thumb_path,
+            ])
 
             ### Step 4: For every image, create a thumbnail in the specified folder, to be used by the web UI:
             # TODO: To be handled by a forked process (danger: forkbomb if many images?)
