@@ -62,11 +62,11 @@ def main(argv):
         images.extend(glob(pattern))
 
     log("Image paths found:", images)
-    raw_input("Have a break?")
 
     images_with_geo = []
     for fname in images:
-        with pexif.JpegFile.fromFile(fname) as i:
+        with open(fname, 'r') as fi:
+            i = pexif.JpegFile.fromFd(fi)
             try:
                 print i.get_geo()
                 images_with_geo.append(i)
