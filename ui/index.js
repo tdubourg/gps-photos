@@ -30,6 +30,8 @@ var	load_images_db = function (db_path) {
 }
 
 
+var infowindowOpen = null
+
 function showThumb(data){
 	//trace un marqueur
 	var placeholder = "thumbs/20141017_131027_Richtone(HDR).jpg"
@@ -61,8 +63,8 @@ function showThumb(data){
 var start = function () {
 	pictures = load_images_db("/thumbs/heyhey.csv")
 	var mapOptions = {
-		center: { lat: 43.202103, lng: 3.080516}, 
-   		zoom: 6
+		center: { lat: 41.41361111111111, lng: 2.1530555555555555}, 
+   		zoom: 9
 	};
 	googleMap = new google.maps.Map(document.getElementById("googleMap"),mapOptions);
 	for (var i = pictures.length - 1; i >= 0; i--) {
