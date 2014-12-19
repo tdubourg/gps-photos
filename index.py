@@ -101,25 +101,82 @@ def main(argv):
     log("Image paths found:", images)
 
     thumbs_to_be_generated = []
+    images_data = []
+    # closures ftw!
+    def insert_im_in_db(fname, geo):
+        thumb_path = thumbnail_path(fname)
+        db_w.writerow([
+            fname,
+            -1, # TODO
+            geo[0],
+            geo[1],
+            thumb_path,
+        ])
+        thumbs_to_be_generated.append((fname, thumb_path))
+
     for fname in images:
         with open(fname, 'r') as fi:
             i = pexif.JpegFile.fromFd(fi)
+            geo = None
             try:
                 geo = i.get_geo()
             except Exception:
                 log(fname, "has no GEO info")
                 continue  # Skip the rest, no geo data
+            finally:
+                images_data.append([fname, os.path.getmtime(fname), geo])
 
             ### Step 3: For every image with geo data, register it in a CSV file (we do not need a DB, CSV is more readable...) ###
-            thumb_path = thumbnail_path(fname)
-            db_w.writerow([
-                fname,
-                -1, # TODO
-                geo[0],
-                geo[1],
-                thumb_path,
-            ])
-            thumbs_to_be_generated.append((fname, thumb_path))
+            insert_im_in_db(fname, geo)
+
+    ## Step 5: Assign suggestion of locations to time-neighboring images and add them to the DB file
+    images_data.sort(key=lambda x: x[1])
+    maxi = len(images_data) - 1
+    # pivot = 0
+    # for i in xrange(len(images_data)):
+    #     img = images_data[i]
+    #     if img[2] is None:
+    #         continue
+    #     else:
+    #         if i > 0:
+    #             pivot = i
+
+    # images_data[0], images_data[pivot] = images_data[pivot], images_data[0]
+
+    for i in xrange(len(images_data)):
+        img = images_data[i]
+        if img[2] is None:
+            log("Trying to approximate location of image", i, "(", img[0], ")")
+            closest = (None, float('inf'), None)
+            j = 0
+            found = False
+            while (i-j-1) >= 0 and not found:
+                j += 1
+                if images_data[i-j][2] is not None:
+                    found = True
+
+            # By default, the closest is the one just before... (provided it has some GEO data)
+            if found:
+                log("Found something when going backward")
+                closest = images_data[i-j]
+
+            # ... unless the one just after is closest than the closest!
+            j = 0
+            found2 = False
+            while (i+j+1) <= maxi and not found2:
+                j += 1
+                if images_data[i+j][2] is not None:
+                    found2 = True
+            if found2:
+                log("Found something when going forward")
+                closest = images_data[i+j] \
+                    if abs(img[1] - images_data[i+j][1]) < abs(img[1] - closest[1]) \
+                    else closest
+
+            if found or found2:
+                log(found, found2)
+                img[2] = closest[2]  # using the geotag of the closest # assignation will significantly speed up lookups when there is a continuous sequence of non tagged images between tagged images
+                insert_im_in_db(img[0], img[2])
 
     ### Step 4: For every image, create a thumbnail in the specified folder, to be used by the web UI:
     # TODO: To be handled by a forked process (danger: forkbomb if many images?)
