@@ -74,7 +74,7 @@ var start = function () {
 		markers.push(showThumb(pictures[i]))
 	};
 
-	var zoom = 14;
+	var zoom = 12;
 	var size = -1;
 	zoom = zoom == -1 ? null : zoom;
 	size = size == -1 ? null : size;
