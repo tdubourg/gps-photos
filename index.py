@@ -10,6 +10,16 @@
     Then index things away (see todo for more details?)
 """
 
+# Those modules are not necessarily installed on the machine so we import them as early as possible in order to avoid
+# having the program crash because of missing dependencies only when it executes the function, but rather as soon as
+# it imports the current file/module
+
+from PIL import Image
+import csv, pexif
+
+# And this module is used in several functions so we import it once for all
+import os
+
 DBG = True
 
 def log(*args):
@@ -29,25 +39,25 @@ POOL_SIZE               = 3 # TODO: Determine this depending on the number of CP
 DATA_SET_SIZE           = None
 BATCH_SIZE              = None
 WORKERS_SORT_OF_QUEUE   = None
+THUMBNAIL_SIZE          = 128, 128
+THUMBNAIL_FOLDER        = "/tmp/thumbs/"  # TODO change that
 
 def thumbnail_worker(start_val):
     for x in WORKERS_SORT_OF_QUEUE[start_val:start_val + BATCH_SIZE]:
         log("Processing image", x, "for thumbnailing...")
-        # TEMPORARY! simulating image processing
-        from time import sleep
-        from random import random
-        sleep(random()*3)
+        
+        im = Image.open(x[0])
+        im.thumbnail(THUMBNAIL_SIZE)
+        im.save(x[1])
         log("Finished", x)
     return True
 
 def thumbnail_path(fpath):
-    # @TODO
-    return "/tmp/placeholder.jpg"
+    image_fname = os.path.basename(fpath)
+    return os.path.join(THUMBNAIL_FOLDER, image_fname)
 
 def main(argv):
-    import csv, pexif
     from glob import glob
-    import os
     from multiprocessing import Pool
     from time import time
 
